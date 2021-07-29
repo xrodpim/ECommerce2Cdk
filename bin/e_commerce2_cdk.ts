@@ -14,7 +14,7 @@ new PipelineStack(app, "PipelineStack", {
 
   tags: {
     ["cost"]: "ECommerce",  //apenas uma tag qualquer.
-    ["team"]: "Inatel"
+    ["team"]: "pimenta"
   }
 
 });

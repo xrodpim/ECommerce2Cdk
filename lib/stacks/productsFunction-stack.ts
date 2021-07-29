@@ -5,13 +5,13 @@ import * as lambdaNodeJS from "@aws-cdk/aws-lambda-nodejs"
 
 export class ProductsFunctionStack extends cdk.Stack {
 
-  readonly handler: lambdaNodeJS.NodeJsFunction;
+  readonly handler: lambdaNodeJS.NodejsFunction;
 
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
 
     super(scope, id, props);
 
-    this.handler = new lambdaNodeJS.NodeJsFunction(this, "ProductsFunction", {
+    this.handler = new lambdaNodeJS.NodejsFunction(this, "ProductsFunction", {
 
       functionName: "ProductsFunction",
       entry: "lambda/productsFunction,js",
