@@ -53,6 +53,22 @@ export class ECommerceApiStack extends cdk.Stack {
     //GET /products
     productsResource.addMethod("GET", productsFunctionIntegration);
 
+
+    //POST /products
+    productsResource.addMethod("POST", productsFunctionIntegration);
+    // /products/{id}
+    const productsIdResource = productsResource.addResource("{id}");
+
+    //get /products/{id}
+    productsResource.addMethod("GET", productsFunctionIntegration);
+
+    //PUT /products/{id}
+    productsResource.addMethod("PUT", productsFunctionIntegration);
+    //DELETE /products/{id}
+    productsResource.addMethod("DELETE", productsFunctionIntegration);
+
+
+
     this.urlOutput = new cdk.CfnOutput(this, "url", {
       exportName: "url",
       value: api.url,

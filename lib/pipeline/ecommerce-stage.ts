@@ -1,6 +1,7 @@
 import * as cdk from "@aws-cdk/core"
 import { ProductsFunctionStack } from "../stacks/productsFunction-stack";
 import { ECommerceApiStack } from "../stacks/ecommerceApi-stack";
+import { ProductsDbdStack } from "../stacks/productsDbd-stack";
 
 export class ECommerceStage extends cdk.Stage {
 
@@ -15,11 +16,18 @@ export class ECommerceStage extends cdk.Stage {
       ["team"]: "pimenta",
     };
 
+    const productsDbdStack = new ProductsDbdStack(
+      this, "ProductsDbd", {
+      tags: tags,
+    }
+    );
+
     const productsFunctionStack = new ProductsFunctionStack(
 
 
       this,
       "ProductsFunction",
+      productsDbdStack.table,
 
       {
         tags: tags,
