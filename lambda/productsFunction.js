@@ -46,6 +46,59 @@ exports.handler = async function (event, context) {
         body: JSON.stringify(product),
       }
     }
+  } else if (event.resource === "/products/{id}") {
+
+    const productID = event.pathParameters.id;
+    if (method === "GET") {
+      const data = await getProductById(productID);
+      if (data.Item) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify(data.Item),
+        }
+      } else {
+        return {
+          statusCode: 404,
+          body: JSON.stringify('PRoduct with ID $ {productId} not found'),
+        }
+      }
+    } else if (method === "PUT") {
+      const data = await getPRoductById(productID);
+      if (data.Item) {
+
+        const product = JSON.parse(event.body)
+        const result = await updateProduct(productId, product);
+        console.log(result);
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify(product),
+        };
+      } else {
+        return {
+          statusCode: 404,
+          body: JSON.stringify('PRoduct with ID $ {productId} not found'),
+        };
+      }
+
+    } else if (method === "DELETE") {
+      const data = await getPRoductById(productID);
+      if (data.Item) {
+        const result = await deleteProduct(productID);
+        console.log(result);
+        return {
+          statusCode: 200,
+          body: JSON.stringify(data.Item),
+        }
+      }
+      else {
+        return {
+          statusCode: 404,
+          body: JSON.stringify('PRoduct with ID $ {productId} not found'),
+        };
+      }
+    }
+
   }
 
   return {
@@ -57,6 +110,66 @@ exports.handler = async function (event, context) {
       LambdaRequestId: lambdaRequestId,
     }),
   };
+
+
+  function deleteProduct(productId) {
+
+    const params = {
+      TableName: productsDbd,
+      key: {
+        id: productId,
+      },
+      ReturnValues: "ALL_OLD"
+    }
+
+    try {
+      return ddbClient.delete(params).promise();
+    } catch (err) {
+      console.log(err);
+    }
+
+
+
+  }
+
+  function updateProduct(productId, product) {
+    const params = {
+      TableName: productsDbd,
+      Key: {
+        id: productId
+      },
+      UpdateExpression: "set productName = :n, code = :c, price = :p, model = :m",
+      ExpressionAttributesValues: {
+        ":n": product.productName,
+        ":c": product.code,
+        ":p": product.price,
+        ":m": product.model
+      },
+      ReturnValues: "UPDATE_NEW",
+    };
+
+    try {
+      return ddbClient.update(params).promise();
+    } catch (err) {
+      return err;
+    }
+  }
+
+  function getProductById(productId) {
+    const params = {
+      key: {
+        id: productId,
+      }
+    }
+
+    try {
+      return ddbClient.get(params).promise();
+    } catch (err) {
+      console.log(err);
+    }
+
+  }
+
 
 
   function createProduct(product) {
