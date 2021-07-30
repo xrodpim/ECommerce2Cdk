@@ -100,11 +100,11 @@ exports.handler = async function (event, context) {
 
         const eventResultPromise = createProductEvent(data.Item, "PRODUCT_DELETED", "clotilde", lambdaRequestId);
 
-        const results = await Promise.all(
+        const results = await Promise.all([
           deleteResultPromise,
           eventResultPromise,
 
-        );
+        ]);
 
         console(results[0]);
         console(results[1]);
@@ -213,7 +213,7 @@ exports.handler = async function (event, context) {
   }
 
 
-
+  //Métodoo desatualizado. Atualizar com o código do Paulo
   function createProduct(product) {
     const params = {
       TableName: productsDbd,
