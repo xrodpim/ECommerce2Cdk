@@ -3,7 +3,7 @@ import { ProductsFunctionStack } from "../stacks/productsFunction-stack";
 import { ECommerceApiStack } from "../stacks/ecommerceApi-stack";
 import { ProductsDbdStack } from "../stacks/productsDbd-stack";
 import { EventsDbdStack } from "../stacks/eventsDbd-stack";
-import { ProductEventsFunctionStack } from "../stacks/productEventsFunction-stack";
+import { ProductsEventFunctionStack } from "../stacks/productEventsFunction-stack";
 
 export class ECommerceStage extends cdk.Stage {
 
@@ -29,8 +29,8 @@ export class ECommerceStage extends cdk.Stage {
     })
 
 
-    const productEventsFunctionStack = new ProductEventsFunction(this, "ProductEventsFunction",
-      eventDbdStack.table,
+    const productEventsFunctionStack = new ProductsEventFunctionStack(this, "ProductEventsFunction",
+      eventsDbdStack.table,
       {
         tags: tags,
       });
