@@ -15,7 +15,7 @@ export class ProductsEventFunctionStack extends cdk.Stack {
     this.handler = new lambdaNodeJS.NodejsFunction(this, "ProductsEventFunction", {
 
       functionName: "ProductsEventFunction",
-      entry: "lambda/productsEventFunction.js",
+      entry: "lambda/productEventsFunction.js",
       handler: "handler",
       bundling: {
 
