@@ -2,6 +2,8 @@ import * as cdk from "@aws-cdk/core"
 import { ProductsFunctionStack } from "../stacks/productsFunction-stack";
 import { ECommerceApiStack } from "../stacks/ecommerceApi-stack";
 import { ProductsDbdStack } from "../stacks/productsDbd-stack";
+import { EventsDbdStack } from "../stacks/eventsDbd-stack";
+import { ProductEventsFunctionStack } from "../stacks/productEventsFunction-stack";
 
 export class ECommerceStage extends cdk.Stage {
 
@@ -22,18 +24,40 @@ export class ECommerceStage extends cdk.Stage {
     }
     );
 
+    const eventsDbdStack = new EventsDbdStack(this, "EventsDbd", {
+      tags: tags,
+    })
+
+
+    const productEventsFunctionStack = new ProductEventsFunction(this, "ProductEventsFunction",
+      eventDbdStack.table,
+      {
+        tags: tags,
+      });
+
+    productEventsFunctionStack.addDependency(eventsDbdStack);
+
+
+
+
+
     const productsFunctionStack = new ProductsFunctionStack(
 
 
       this,
       "ProductsFunction",
       productsDbdStack.table,
+      productEventsFunctionStack.handler,
 
       {
         tags: tags,
       }
 
     );
+
+
+    productsFunctionStack.addDependency(productsDbdStack);
+    productsFunctionStack.addDependency(productEventsFunctionStack);
 
     const eCommerceApiStack = new ECommerceApiStack(
       this,

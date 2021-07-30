@@ -8,7 +8,9 @@ export class ProductsFunctionStack extends cdk.Stack {
 
   readonly handler: lambdaNodeJS.NodejsFunction;
 
-  constructor(scope: cdk.Construct, id: string, productsDbd: dynamodb.Table, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, productsDbd: dynamodb.Table,
+    productEventsFunction: lambdaNodeJS.NodejsFunction,
+    props?: cdk.StackProps) {
 
     super(scope, id, props);
 
@@ -29,12 +31,14 @@ export class ProductsFunctionStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         PRODUCTS_DBD: productsDbd.tableName,
+        PRODUCT_EVENTS_FUNCTION_NAME: productEventsFunction.functionName,
       }
 
 
     });
 
     productsDbd.grantReadWriteData(this.handler);
+    productEventsFunction.grantInvoke(this.handler);
 
   }
 
