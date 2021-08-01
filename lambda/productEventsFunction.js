@@ -4,7 +4,7 @@ const AWSXRay = require("aws-xray-sdk-core");
 
 const xRay = AWSXRay.captureAWS(require("aws-sdk"));
 
-const eventsDbd = process.env.EVENTS_DDB;
+const eventsDdb = process.env.EVENTS_DDB;
 const awsRegion = process.env.AWS_REGION;
 
 AWS.config.update({
@@ -16,7 +16,7 @@ const ddbClient = new AWS.DynamoDB.DocumentClient();
 exports.handler = async function (event, context) {
   console.log(event);
 
-  await createEvent(event.productEvent, context);
+  await createEvent(event.productEvent);
 
   console.log(
     'Product event created - ProductId: ${event.productEvent.productId} - RequestId: ${event.productEvent.requestId}'
@@ -45,5 +45,9 @@ function createEvent(productEvent) {
       productId: productEvent.productId,
     },
   };
-  return ddbClient.put(params).promise();
+  try {
+    return ddbClient.put(params).promise();
+  } catch (err) {
+    console.log(err);
+  }
 }

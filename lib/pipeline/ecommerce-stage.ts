@@ -1,9 +1,9 @@
 import * as cdk from "@aws-cdk/core"
 import { ProductsFunctionStack } from "../stacks/productsFunction-stack";
 import { ECommerceApiStack } from "../stacks/ecommerceApi-stack";
-import { ProductsDbdStack } from "../stacks/productsDbd-stack";
-import { EventsDbdStack } from "../stacks/eventsDbd-stack";
-import { ProductsEventFunctionStack } from "../stacks/productEventsFunction-stack";
+import { ProductsDdbStack } from "../stacks/productsDbd-stack";
+import { EventsDdbStack } from "../stacks/eventsDbd-stack";
+import { ProductEventsFunctionStack } from "../stacks/productEventsFunction-stack";
 
 export class ECommerceStage extends cdk.Stage {
 
@@ -18,35 +18,31 @@ export class ECommerceStage extends cdk.Stage {
       ["team"]: "pimenta",
     };
 
-    const productsDbdStack = new ProductsDbdStack(
-      this, "ProductsDbd", {
+    const productsDdbStack = new ProductsDdbStack(
+      this, "ProductsDdb", {
       tags: tags,
     }
     );
 
-    const eventsDbdStack = new EventsDbdStack(this, "EventsDbd", {
+    const eventsDdbStack = new EventsDdbStack(this, "EventsDbd", {
       tags: tags,
     })
 
 
-    const productEventsFunctionStack = new ProductsEventFunctionStack(this, "ProductEventsFunction",
-      eventsDbdStack.table,
+    const productEventsFunctionStack = new ProductEventsFunctionStack(this, "ProductEventsFunction",
+      eventsDdbStack.table,
       {
         tags: tags,
-      });
+      }
+    );
 
-    productEventsFunctionStack.addDependency(eventsDbdStack);
-
-
-
-
+    productEventsFunctionStack.addDependency(eventsDdbStack);
 
     const productsFunctionStack = new ProductsFunctionStack(
 
-
       this,
       "ProductsFunction",
-      productsDbdStack.table,
+      productsDdbStack.table,
       productEventsFunctionStack.handler,
 
       {
@@ -56,12 +52,12 @@ export class ECommerceStage extends cdk.Stage {
     );
 
 
-    productsFunctionStack.addDependency(productsDbdStack);
+    productsFunctionStack.addDependency(productsDdbStack);
     productsFunctionStack.addDependency(productEventsFunctionStack);
 
     const eCommerceApiStack = new ECommerceApiStack(
       this,
-      "ECommerceAPI",
+      "ECommerceApi",
       productsFunctionStack.handler,
       {
         tags: tags,
@@ -72,13 +68,5 @@ export class ECommerceStage extends cdk.Stage {
 
     this.urlOutPut = eCommerceApiStack.urlOutput;
 
-
-
-
-
   }
-
-
-
-
 }

@@ -4,10 +4,10 @@ const uuid = require("uuid");
 
 const xRay = AWSXRay.captureAWS(require("aws-sdk"));
 
-const productsDbd = process.env.PRDUCTS_DDB;
+const productsDdb = process.env.PRODUCTS_DDB;
 
 const awsRegion = process.env.AWS_REGION;
-const productEventFunctionName = process.event.PRODUCT_EVENT_FUNCTION_NAME;
+const productEventFunctionName = process.env.PRODUCT_EVENTS_FUNCTION_NAME;
 
 AWS.config.update({ region: awsRegion });
 
@@ -70,7 +70,7 @@ exports.handler = async function (event, context) {
         }
       }
     } else if (method === "PUT") {
-      const data = await getPRoductById(productID);
+      const data = await getProductById(productID);
       if (data.Item) {
 
         const product = JSON.parse(event.body)
@@ -139,7 +139,7 @@ exports.handler = async function (event, context) {
   function createProductEvent(product, eventType, username, lambdaRequestId) {
     const params = {
       FunctionName: productEventsFunctionName,
-      InvocationType: "RequestResponse",
+      InvocationType: "Event",
       Payload: JSON.stringify({
         productEvent: {
           requestId: lambdaRequestId,
@@ -157,7 +157,7 @@ exports.handler = async function (event, context) {
   function deleteProduct(productId) {
 
     const params = {
-      TableName: productsDbd,
+      TableName: productsDdb,
       key: {
         id: productId,
       },
@@ -176,16 +176,17 @@ exports.handler = async function (event, context) {
 
   function updateProduct(productId, product) {
     const params = {
-      TableName: productsDbd,
+      TableName: productsDdb,
       Key: {
         id: productId
       },
-      UpdateExpression: "set productName = :n, code = :c, price = :p, model = :m",
+      UpdateExpression: "set productName = :n, code = :c, price = :p, model = :m, productUrl = :u",
       ExpressionAttributesValues: {
         ":n": product.productName,
         ":c": product.code,
         ":p": product.price,
-        ":m": product.model
+        ":m": product.model,
+        ":u": product.productUrl
       },
       ReturnValues: "UPDATE_NEW",
     };
@@ -199,6 +200,7 @@ exports.handler = async function (event, context) {
 
   function getProductById(productId) {
     const params = {
+      TableName: productsDdb,
       key: {
         id: productId,
       }
@@ -216,13 +218,14 @@ exports.handler = async function (event, context) {
   //Métodoo desatualizado. Atualizar com o código do Paulo
   function createProduct(product) {
     const params = {
-      TableName: productsDbd,
+      TableName: productsDdb,
       Item: {
         id: product.id,
         productName: product.productName,
         code: product.code,
         price: product.price,
         model: product.model,
+        productUrl: product.productUrl,
       }
     };
 
@@ -238,7 +241,7 @@ exports.handler = async function (event, context) {
   function getAllProducts() {
     try {
       const params = {
-        TableName: productsDbd,
+        TableName: productsDdb,
       };
       return ddbClient.scan(param).promise();
     } catch (err) {

@@ -1,7 +1,7 @@
 import * as cdk from "@aws-cdk/core"
 import * as dynamodb from "@aws-cdk/aws-dynamodb"
 
-export class ProductsDbdStack extends cdk.Stack {
+export class ProductsDdbStack extends cdk.Stack {
 
   readonly table: dynamodb.Table
 
@@ -9,7 +9,7 @@ export class ProductsDbdStack extends cdk.Stack {
 
     super(scope, id, props);
 
-    this.table = new dynamodb.Table(this, "ProductsDbd", {
+    this.table = new dynamodb.Table(this, "ProductsDdb", {
 
       tableName: "products",
       partitionKey: {

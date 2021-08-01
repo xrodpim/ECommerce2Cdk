@@ -4,7 +4,7 @@ import * as lambdaNodeJS from "@aws-cdk/aws-lambda-nodejs"
 import * as dynamodb from "@aws-cdk/aws-dynamodb"
 
 
-export class ProductsEventFunctionStack extends cdk.Stack {
+export class ProductEventsFunctionStack extends cdk.Stack {
 
   readonly handler: lambdaNodeJS.NodejsFunction;
 
@@ -12,9 +12,9 @@ export class ProductsEventFunctionStack extends cdk.Stack {
 
     super(scope, id, props);
 
-    this.handler = new lambdaNodeJS.NodejsFunction(this, "ProductsEventFunction", {
+    this.handler = new lambdaNodeJS.NodejsFunction(this, "ProductEventsFunction", {
 
-      functionName: "ProductsEventFunction",
+      functionName: "ProductEventsFunction",
       entry: "lambda/productEventsFunction.js",
       handler: "handler",
       bundling: {
