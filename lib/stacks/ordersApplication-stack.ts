@@ -73,28 +73,52 @@ export class OrdersApplicationStack extends cdk.Stack {
     ordersTopic.grantPublish(this.ordersHandler);
 
 
-    const orderEventDlq = new sqs.Queue(this, "OrderEventsDlq", {
+    const orderEventsDlq = new sqs.Queue(this, "OrderEventsDlq", {
       queueName: "Order-events-dlq",
     }
     );
 
     const orderEvents = new sqs.Queue(this, "OrderEvents", {
-      queueName: "Order-events",
+      queueName: "order-events",
       deadLetterQueue: {
-        queue: orderEventDlq,
+        queue: orderEventsDlq,
         maxReceiveCount: 3,
       },
     });
+    ordersTopic.addSubscription(
+      new subs.SqsSubscription(orderEvents, {
+        filterPolicy: {
+          eventType: sns.SubscriptionFilter.stringFilter({
+            allowlist: ["ORDER_CREATED", "ORDER_DELETED"],
+          }),
+        },
+      })
+    );
 
-    ordersTopic.addSubscription(new subs.SqsSubscription(orderEvents));
+    ordersTopic.addSubscription(
+      new subs.EmailSubscription("siecola@gmail.com", {
+        json: true,
+        filterPolicy: {
+          eventType: sns.SubscriptionFilter.stringFilter({
+            allowlist: ["ORDER_DELETED"],
+          }),
+        },
+      })
+    );
 
 
+    const orderEventsTest = new sqs.Queue(this, "OrderEventsTest", {
+      queueName: "order-events-test",
+    });
 
-
-
-    ordersTopic.addSubscription(new subs.EmailSubscription("pimenta@inatel.br", {
-      json: true
-    })
+    ordersTopic.addSubscription(
+      new subs.SqsSubscription(orderEventsTest, {
+        filterPolicy: {
+          eventType: sns.SubscriptionFilter.stringFilter({
+            allowlist: ["ORDER_CREATED"],
+          }),
+        },
+      })
     );
   }
 }
