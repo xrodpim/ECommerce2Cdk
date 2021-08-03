@@ -2,6 +2,11 @@ import * as cdk from "@aws-cdk/core"
 import * as lambda from "@aws-cdk/aws-lambda"
 import * as lambdaNodeJS from "@aws-cdk/aws-lambda-nodejs"
 import * as dynamodb from "@aws-cdk/aws-dynamodb"
+import * as sns from "@aws-cdk/aws-sns";
+import * as subs from "@aws-cdk/aws-sns-subscriptions";
+import * as sqs from "@aws-cdk/aws-sqs";
+import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
+
 
 
 export class OrdersApplicationStack extends cdk.Stack {
@@ -32,6 +37,11 @@ export class OrdersApplicationStack extends cdk.Stack {
 
     });
 
+    const ordersTopic = new sns.Topic(this, "OrderEventsTopic", {
+      topicName: "order-events",
+      displayName: "Order events topic",
+    });
+
 
 
     this.ordersHandler = new lambdaNodeJS.NodejsFunction(this, "ProductsFunction", {
@@ -52,6 +62,7 @@ export class OrdersApplicationStack extends cdk.Stack {
       environment: {
         PRODUCTS_DBD: productsDbd.tableName,
         ORDERS_DDB: ordersDdb.tableName,
+        ORDER_EVENTS_TOPIC_ARN: ordersTopic.topicArn,
       }
 
 
@@ -59,13 +70,31 @@ export class OrdersApplicationStack extends cdk.Stack {
 
     productsDbd.grantReadData(this.ordersHandler);
     ordersDdb.grantReadWriteData(this.ordersHandler);
+    ordersTopic.grantPublish(this.ordersHandler);
+
+
+    const orderEventDlq = new sqs.Queue(this, "OrderEventsDlq", {
+      queueName: "Order-events-dlq",
+    }
+    );
+
+    const orderEvents = new sqs.Queue(this, "OrderEvents", {
+      queueName: "Order-events",
+      deadLetterQueue: {
+        queue: orderEventDlq,
+        maxReceiveCount: 3,
+      },
+    });
+
+    ordersTopic.addSubscription(new subs.SqsSubscription(orderEvents));
 
 
 
 
 
-
-
-
+    ordersTopic.addSubscription(new subs.EmailSubscription("pimenta@inatel.br", {
+      json: true
+    })
+    );
   }
 }
