@@ -22,13 +22,15 @@ export class EventsDdbStack extends cdk.Stack {
       },
       timeToLiveAttribute: "ttl",
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      billingMode: dynamodb.BillingMode.PROVISIONED,
+      billingMode: dynamodb.BillingMode.PROVISIONED
+      /*
       readCapacity: 1,
       writeCapacity: 1
+      */
 
     });
 
-
+    /*
     const readScale = this.table.autoScaleReadCapacity({
       maxCapacity: 4,
       minCapacity: 1,
@@ -48,6 +50,7 @@ export class EventsDdbStack extends cdk.Stack {
       scaleInCooldown: cdk.Duration.seconds(60),
       scaleOutCooldown: cdk.Duration.seconds(60),
     });
+    */
 
 
 
