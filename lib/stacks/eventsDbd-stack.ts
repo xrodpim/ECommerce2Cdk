@@ -30,6 +30,34 @@ export class EventsDdbStack extends cdk.Stack {
 
     });
 
+    this.table.addGlobalSecondaryIndex(
+      {
+        indexName: "usernameIdx",
+        partitionKey: {
+          name: "username",
+          type: dynamodb.AttributeType.STRING,
+        },
+        sortKey: {
+          name: "pk",
+          type: dynamodb.AttributeType.STRING,
+        },
+        projectionType: dynamodb.ProjectionType.ALL,
+      }
+    );
+
+    this.table.addGlobalSecondaryIndex({
+      indexName: "usernameIdx",
+      partitionKey: {
+        name: "username",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "pk",
+        type: dynamodb.AttributeType.STRING,
+      },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     /*
     const readScale = this.table.autoScaleReadCapacity({
       maxCapacity: 4,
