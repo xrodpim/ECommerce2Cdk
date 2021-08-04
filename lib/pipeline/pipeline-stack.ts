@@ -2,7 +2,6 @@ import * as codepipeline from "@aws-cdk/aws-codepipeline";
 import * as codepipeline_actions from "@aws-cdk/aws-codepipeline-actions";
 import * as cdk from "@aws-cdk/core";
 import { CdkPipeline, SimpleSynthAction } from "@aws-cdk/pipelines";
-//import { pipeline } from "stream";
 import { ECommerceStage } from "./ecommerce-stage";
 
 export class PipelineStack extends cdk.Stack {
@@ -33,9 +32,9 @@ export class PipelineStack extends cdk.Stack {
         buildCommand: "npm run build",
         environment: {
           privileged: true,
-        }
+        },
 
-      })
+      }),
 
     });
 

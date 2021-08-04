@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core"
 import * as lambda from "@aws-cdk/aws-lambda"
 import * as lambdaNodeJS from "@aws-cdk/aws-lambda-nodejs"
 import * as dynamodb from "@aws-cdk/aws-dynamodb"
+import * as sqs from "@aws-cdk/aws-sqs";
 
 
 export class ProductEventsFunctionStack extends cdk.Stack {
@@ -11,6 +12,11 @@ export class ProductEventsFunctionStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, eventsDbd: dynamodb.Table, props?: cdk.StackProps) {
 
     super(scope, id, props);
+
+    const dlq = new sqs.Queue(this, "ProductEventsDlq", {
+      queueName: "product-events-dlq",
+      retentionPeriod: cdk.Duration.days(10),
+    });
 
     this.handler = new lambdaNodeJS.NodejsFunction(this, "ProductEventsFunction", {
 
@@ -29,7 +35,9 @@ export class ProductEventsFunctionStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         EVENTS_DBD: eventsDbd.tableName,
-      }
+      },
+      deadLetterQueueEnabled: true,
+      deadLetterQueue: dlq,
     });
 
     eventsDbd.grantWriteData(this.handler);

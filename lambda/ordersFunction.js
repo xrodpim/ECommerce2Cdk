@@ -83,6 +83,10 @@ exports.handler = async function (event, context) {
 
         const eventResult = await sendOrderEvent(orderCreated, "ORDER_CREATED", lambdaRequestId);
 
+        console.log(
+          `Order created event sent - OrderId: ${orderCreated.sk} - MessageId: ${eventResult.MessageId}`
+        );
+
         return {
           statusCode: 201,
           body: JSON.stringify(convertToOrderResponse(orderCreated)),
@@ -98,6 +102,12 @@ exports.handler = async function (event, context) {
       if (event.queryStringParameters && event.queryStringParameters.username && event.queryStringParameters.orderId) {
         //Delete an order
         const data = await getOrder(event.queryStringParameters.username, event.queryStringParameters.orderId);
+        //DELETE /orders?username=matilde&orderId=123
+        //Delete an order
+        const data = await getOrder(
+          event.queryStringParameters.username,
+          event.queryStringParameters.orderId
+        );
         if (data.Item) {
           const deleteOrderPromise = deleteOrder(
             event.queryStringParameters.username,
@@ -110,6 +120,10 @@ exports.handler = async function (event, context) {
             deleteOrderPromise,
             deleteOrderEventPromise
           ]);
+
+          console.log(
+            `Order deleted event sent - OrderId: ${data.Item.sk} - MessageId: ${results[1].MessageId}`
+          );
 
           return {
             statusCode: 200,

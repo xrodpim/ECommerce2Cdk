@@ -43,6 +43,9 @@ function createEvent(productEvent) {
       requestId: productEvent.requestId,
       eventType: productEvent.eventType,
       productId: productEvent.productId,
+      info: {
+        productId: productEvent.productId,
+      },
     },
   };
   try {

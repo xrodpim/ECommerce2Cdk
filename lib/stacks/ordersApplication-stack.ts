@@ -8,13 +8,12 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
 
-
 export class OrdersApplicationStack extends cdk.Stack {
 
   readonly ordersHandler: lambdaNodeJS.NodejsFunction;
 
   constructor(scope: cdk.Construct, id: string, productsDbd: dynamodb.Table,
-    productEventsFunction: lambdaNodeJS.NodejsFunction,
+    eventsDdb: dynamodb.Table,
     props?: cdk.StackProps) {
 
     super(scope, id, props);
@@ -78,7 +77,7 @@ export class OrdersApplicationStack extends cdk.Stack {
     }
     );
 
-    const orderEvents = new sqs.Queue(this, "OrderEvents", {
+    const orderEventsQueue = new sqs.Queue(this, "OrderEvents", {
       queueName: "order-events",
       deadLetterQueue: {
         queue: orderEventsDlq,
@@ -86,7 +85,7 @@ export class OrdersApplicationStack extends cdk.Stack {
       },
     });
     ordersTopic.addSubscription(
-      new subs.SqsSubscription(orderEvents, {
+      new subs.SqsSubscription(orderEventsQueue, {
         filterPolicy: {
           eventType: sns.SubscriptionFilter.stringFilter({
             allowlist: ["ORDER_CREATED", "ORDER_DELETED"],
@@ -95,6 +94,7 @@ export class OrdersApplicationStack extends cdk.Stack {
       })
     );
 
+    /*
     ordersTopic.addSubscription(
       new subs.EmailSubscription("siecola@gmail.com", {
         json: true,
@@ -105,7 +105,7 @@ export class OrdersApplicationStack extends cdk.Stack {
         },
       })
     );
-
+   */
 
     const orderEventsTest = new sqs.Queue(this, "OrderEventsTest", {
       queueName: "order-events-test",
@@ -120,5 +120,29 @@ export class OrdersApplicationStack extends cdk.Stack {
         },
       })
     );
+
+
+    const orderEventsHandler = new lambdaNodeJS.NodejsFunction(
+      this,
+      "OrderEventsFunction",
+      {
+        functionName: "OrderEventsFunction",
+        entry: "lambda/orderEventsFunction.js",
+        handler: "handler",
+        bundling: {
+          minify: false,
+          sourceMap: false,
+        },
+        tracing: lambda.Tracing.ACTIVE,
+        memorySize: 128,
+        timeout: cdk.Duration.seconds(30),
+        environment: {
+          EVENTS_DDB: eventsDdb.tableName,
+        },
+      }
+    );
+    orderEventsHandler.addEventSource(new SqsEventSource(orderEventsQueue));
+    eventsDdb.grantWriteData(orderEventsHandler);
+    orderEventsQueue.grantConsumeMessages(orderEventsHandler);
   }
 }
