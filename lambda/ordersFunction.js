@@ -104,10 +104,7 @@ exports.handler = async function (event, context) {
         const data = await getOrder(event.queryStringParameters.username, event.queryStringParameters.orderId);
         //DELETE /orders?username=matilde&orderId=123
         //Delete an order
-        const data = await getOrder(
-          event.queryStringParameters.username,
-          event.queryStringParameters.orderId
-        );
+
         if (data.Item) {
           const deleteOrderPromise = deleteOrder(
             event.queryStringParameters.username,
