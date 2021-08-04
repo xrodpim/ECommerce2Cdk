@@ -33,7 +33,7 @@ function createEvent(productEvent) {
   const timestamp = Date.now();
   const ttl = ~~(timestamp / 1000 + 60 * 60) // 60 minutos
   const params = {
-    TableName: eventsDbd,
+    TableName: eventsDdb,
     Item: {
       pk: '#product_${productEvent.productCode}',
       sk: '${productEvent.eventType}#${timestamp}',
